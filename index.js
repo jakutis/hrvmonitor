@@ -1,4 +1,4 @@
-let points, times, mark;
+let points, times, mark, drawingPaused;
 
 const extractWindow = (rrs, window) => {
   let duration = 0
@@ -137,6 +137,7 @@ const start = async (domElements) => {
     return c
   }, {})
   times = []
+  drawingPaused = false
   mark = false
 
   characteristic.startNotifications()
@@ -148,6 +149,9 @@ const markerSeries = (s, value) => {
 }
 
 const redraw = (domElements) => {
+  if (drawingPaused) {
+    return
+  }
   chartIds.forEach(chartId => {
     if (points[chartId].length === 0) {
       return
@@ -224,6 +228,11 @@ const main = async () => {
   button.addEventListener('click', async () => {
     stop = await start(domElements)
   }, false)
+
+  const pauseButton = document.createElement('button')
+  pauseButton.appendChild(document.createTextNode('toggle pause'))
+  app.appendChild(pauseButton)
+  pauseButton.addEventListener('click', () => drawingPaused = !drawingPaused, false)
 
   const stopButton = document.createElement('button')
   stopButton.appendChild(document.createTextNode('stop'))
