@@ -244,7 +244,7 @@ const main = async () => {
   app.appendChild(serializedData)
 
   const windowsElement = document.createElement('div')
-  windowsElement.className = 'legend'
+  windowsElement.className = 'legend noselect'
   app.appendChild(windowsElement)
   windows.forEach((window, i) => {
     const label = document.createElement('span')
@@ -256,6 +256,7 @@ const main = async () => {
   const domElements = {}
   chartIds.forEach(chartId => {
     const header = document.createElement('h2')
+    header.className = 'noselect'
     header.appendChild(document.createTextNode(chartId))
     header.addEventListener('click', () => element.scrollIntoView({block:'end'}), false)
     app.appendChild(header)
