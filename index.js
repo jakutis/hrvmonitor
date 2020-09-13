@@ -167,9 +167,9 @@ const seriesColors = [
   '#6B8FFF',
   'purple',
   'gold',
-  '#136F63',
   'lime',
-  'darkorange'
+  'darkorange',
+  '#136F63'
 ]
 
 const colors = window.matchMedia('(prefers-color-scheme: dark)').matches
