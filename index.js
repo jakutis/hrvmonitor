@@ -1,4 +1,4 @@
-let points, times, mark, drawingPaused;
+let points, times, mark, drawingPaused, windowRendered;
 
 const extractWindow = (rrs, window) => {
   let duration = 0
@@ -49,6 +49,7 @@ const features = {
   }
 }
 const windows = [7.5, 15, 30, 60, 120, 240, 480]
+windowRendered = windows.map(() => true)
 
 const chartIds = ['heartRate', 'RR'].concat(Object.keys(features))
 
@@ -178,12 +179,12 @@ const colors = window.matchMedia('(prefers-color-scheme: dark)').matches
 const drawChart = (domElement, series) => {
   const minimum = min(series.slice(1).map(min))
   const maximum = max(series.slice(1).map(max))
-  let d = series.slice(1).map((s, i) => ({
+  let d = series.slice(1).flatMap((s, i) => !windowRendered[i] ? [] : [{
     x: times,
     y: s.slice(0),
     line: {color: seriesColors[i + 1]},
     name: ''
-  })).concat({
+  }]).concat({
     line: {color: seriesColors[0]},
     name: '',
     x: series[0].flatMap((s, i) => s === null ? null : [times[i], times[i]]),
@@ -260,7 +261,12 @@ const main = async () => {
   app.appendChild(windowsElement)
   windows.forEach((window, i) => {
     const label = document.createElement('span')
-    label.style.backgroundColor = seriesColors[i + 1]
+    label.addEventListener('click', () => {
+      windowRendered[i] = !windowRendered[i]
+      label.style.background = windowRendered[i] ? seriesColors[i + 1] : 'transparent'
+      redraw(domElements)
+    }, false)
+    label.style.background = windowRendered[i] ? seriesColors[i + 1] : 'transparent'
     label.appendChild(document.createTextNode(`${window}s`))
     windowsElement.appendChild(label)
   })
