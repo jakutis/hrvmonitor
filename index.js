@@ -162,11 +162,11 @@ const redraw = (domElements) => {
 
 const seriesColors = [
   'blue',
-  'red',
+  'blue',
   'gold',
   'green',
   'firebrick',
-  'darkkhaki',
+  'cyan',
   'deeppink',
   'darkorange',
   'lime',
