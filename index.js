@@ -248,7 +248,7 @@ const main = async () => {
   app.appendChild(windowsElement)
   windows.forEach((window, i) => {
     const label = document.createElement('span')
-    label.className = `label-${String.fromCharCode(i + 97)}`
+    label.className = `label-${String.fromCharCode(i + 97 + 1)}`
     label.appendChild(document.createTextNode(`${window}s`))
     windowsElement.appendChild(label)
   })
