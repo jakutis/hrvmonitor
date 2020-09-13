@@ -11,8 +11,37 @@
   --app-series-j: black;
 }
 
+html, body {
+  background: white;
+}
+
+button {
+  padding: 2rem;
+}
+
+h2 {
+  position: sticky;
+  top: 2rem;
+  background: white;
+  line-height: 2rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.legend {
+  position: sticky;
+  display: flex;
+  top: 0;
+}
+
+.legend span {
+  flex-grow: 1;
+  line-height: 2rem;
+  text-align: center;
+}
+
 .chart {
-  height: 100vh;
+  height: calc(100vh - 4rem);
 }
 
 .app .label-a {

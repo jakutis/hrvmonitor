@@ -214,26 +214,6 @@ const main = async () => {
   console.log('load')
   const app = document.querySelector('.app')
 
-  window.addEventListener('click', () => addMarker(), false)
-
-  const serializedData = document.createElement('textarea')
-  app.appendChild(serializedData)
-  const loadButton = document.createElement('button')
-  loadButton.appendChild(document.createTextNode('load'))
-  app.appendChild(loadButton)
-  loadButton.addEventListener('click', () => {
-    points = JSON.parse(serializedData.value)
-    redraw(domElements)
-  }, false)
-  const saveButton = document.createElement('button')
-  saveButton.appendChild(document.createTextNode('save'))
-  app.appendChild(saveButton)
-  saveButton.addEventListener('click', () => {
-    serializedData.value = JSON.stringify(points)
-  }, false)
-
-
-
   const button = document.createElement('button')
   button.appendChild(document.createTextNode('start'))
   app.appendChild(button)
@@ -247,20 +227,41 @@ const main = async () => {
   app.appendChild(stopButton)
   stopButton.addEventListener('click', () => stop(), false)
 
+  const serializedData = document.createElement('textarea')
+  const loadButton = document.createElement('button')
+  loadButton.appendChild(document.createTextNode('load'))
+  loadButton.addEventListener('click', () => {
+    points = JSON.parse(serializedData.value)
+    redraw(domElements)
+  }, false)
+  const saveButton = document.createElement('button')
+  saveButton.appendChild(document.createTextNode('save'))
+  saveButton.addEventListener('click', () => {
+    serializedData.value = JSON.stringify(points)
+  }, false)
+  app.appendChild(saveButton)
+  app.appendChild(loadButton)
+  app.appendChild(serializedData)
+
+  const windowsElement = document.createElement('div')
+  windowsElement.className = 'legend'
+  app.appendChild(windowsElement)
   windows.forEach((window, i) => {
-    const label = document.createElement('p')
+    const label = document.createElement('span')
     label.className = `label-${String.fromCharCode(i + 97)}`
     label.appendChild(document.createTextNode(`${window}s`))
-    app.appendChild(label)
+    windowsElement.appendChild(label)
   })
 
   const domElements = {}
   chartIds.forEach(chartId => {
     const header = document.createElement('h2')
     header.appendChild(document.createTextNode(chartId))
+    header.addEventListener('click', () => element.scrollIntoView({block:'end'}), false)
     app.appendChild(header)
 
     const element = document.createElement('div')
+    element.addEventListener('click', () => addMarker(), false)
     element.className = 'chart'
     app.appendChild(element)
     domElements[chartId] = element
