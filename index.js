@@ -177,8 +177,8 @@ const colors = window.matchMedia('(prefers-color-scheme: dark)').matches
   : {fg: '#000', bg: '#fff'}
 
 const drawChart = (domElement, series) => {
-  const minimum = min(series.slice(1).map(min))
-  const maximum = max(series.slice(1).map(max))
+  const minimum = min(series.slice(1).filter((s, i) => windowRendered[i]).map(min))
+  const maximum = max(series.slice(1).filter((s, i) => windowRendered[i]).map(max))
   let d = series.slice(1).flatMap((s, i) => !windowRendered[i] ? [] : [{
     x: times,
     y: s.slice(0),
