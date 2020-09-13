@@ -200,6 +200,7 @@ const drawChart = (domElement, series) => {
       xaxis: {
         color: colors.fg,
         visible: false,
+        range: [new Date(times[times.length - 1].getTime() - 10 * 60 * 1000), times[times.length - 1]]
       }
     }
   const opts = {
