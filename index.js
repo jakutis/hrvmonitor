@@ -48,7 +48,7 @@ const features = {
     return Math.sqrt(sum / rrs.length)
   }
 }
-const windows = [5, 10, 20, 40, 60, 90, 120, 180, 300]
+const windows = [7.5, 15, 30, 60, 120, 240, 480]
 
 const chartIds = ['heartRate', 'RR'].concat(Object.keys(features))
 
