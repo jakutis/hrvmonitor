@@ -161,16 +161,14 @@ const redraw = (domElements) => {
 }
 
 const seriesColors = [
-  'blue',
-  'blue',
+  'red',
+  'red',
+  '#6B8FFF',
+  'purple',
   'gold',
-  'green',
-  'firebrick',
-  'cyan',
-  'deeppink',
-  'darkorange',
+  '#136F63',
   'lime',
-  'black'
+  'darkorange'
 ]
 
 const colors = window.matchMedia('(prefers-color-scheme: dark)').matches
