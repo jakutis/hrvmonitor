@@ -62,17 +62,12 @@ const handleHeartRate = (domElements, hr) => {
   } else {
     chartIds.forEach(c => points[c][0].push(null))
   }
-  console.log(points.RR[0])
 
   points.heartRate[1] = points.heartRate[1] || []
   points.heartRate[1].push(hr.heartRate)
-  console.log('heart rate', hr.heartRate)
 
   points.RR[1] = points.RR[1] || []
   points.RR[1].push.apply(points.RR[1], hr.rrs)
-  hr.rrs.forEach(rr => {
-    console.log('rr', rr)
-  })
 
   const featureNames = Object.keys(features)
   windows.forEach((window, i) => {
@@ -89,7 +84,6 @@ const handleHeartRate = (domElements, hr) => {
       const value = features[feature](rrs)
       points[feature][windowIndex] = points[feature][windowIndex] || []
       points[feature][windowIndex].push(value)
-      console.log(window + 's feature', feature, value)
     })
   })
   redraw(domElements)
@@ -132,13 +126,9 @@ const start = async (domElements) => {
   const device = await navigator.bluetooth.requestDevice({
     filters: [{services: ['heart_rate']}]
   })
-  console.log(device)
   const server = await device.gatt.connect()
-  console.log(server)
   const service = await server.getPrimaryService('heart_rate')
-  console.log(service)
   const characteristic = await service.getCharacteristic('heart_rate_measurement')
-  console.log(characteristic)
 
   characteristic.addEventListener('characteristicvaluechanged', () => handleHeartRate(domElements, decode(new Uint8Array(characteristic.value.buffer))))
   points = chartIds.reduce((c, cid) => {
@@ -166,52 +156,30 @@ const redraw = (domElements) => {
 
 const drawChart = (domElement, series) => {
   const minimum = min(series.slice(1).map(min))
-var data = {
-  // A labels array that can contain any sort of values
-  labels: Object.keys(series[0]),
-  // Our series array that contains series objects or in this case series data arrays
-  series: series.map((s, index) => ({name:`series${index}`, data: index === 0 ? markerSeries(s, minimum) : s}))
-};
-
-var options = {
-  plugins: [
-    window['Chartist.plugins.ctMarker']({
-      series: ['series0']
-    })
-  ],
-  // Don't draw the line chart points
-  showPoint: false,
-  // Disable line smoothing
-  lineSmooth: false,
-  // X-Axis specific configuration
-  axisX: {
-    // We can disable the grid for this axis
-    showGrid: true,
-    // and also don't show the label
-    showLabel: false
-  },
-  // Y-Axis specific configuration
-  axisY: {
-    type: Chartist.AutoScaleAxis,
-    // Lets offset the chart a bit from the labels
-    offset: 60,
-    // The label interpolation function enables you to modify the values
-    // used for the labels on each axis. Here we are converting the
-    // values into million pound.
-    labelInterpolationFnc: function(value) {
-      return value;
+  const data = {
+    labels: Object.keys(series[0]),
+    series: series.map((s, index) => ({name:`series${index}`, data: index === 0 ? markerSeries(s, minimum) : s}))
+  }
+  const options = {
+    plugins: [
+      window['Chartist.plugins.ctMarker']({
+        series: ['series0']
+      })
+    ],
+    showPoint: false,
+    lineSmooth: false,
+    axisX: {
+      showGrid: true,
+      showLabel: false
+    },
+    axisY: {
+      type: Chartist.AutoScaleAxis,
     }
   }
-};
-// Create a new line chart object where as first parameter we pass in a selector
-// that is resolving to our chart container element. The Second parameter
-// is the actual data object.
-new Chartist.Line(domElement, data, options);
-
+  new Chartist.Line(domElement, data, options);
 }
 
 const main = async () => {
-  console.log('load')
   const app = document.querySelector('.app')
 
   const button = document.createElement('button')
@@ -269,4 +237,4 @@ const main = async () => {
   })
 }
 
-main().catch(err => console.log(err.stack))
+main()
