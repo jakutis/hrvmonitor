@@ -161,18 +161,20 @@ const redraw = (domElements) => {
   })
 }
 
+const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+
 const seriesColors = [
-  'red',
-  'red',
+  darkMode ? 'white' : 'black',
+  darkMode ? 'white' : 'black',
   '#6B8FFF',
   'purple',
   'gold',
   'lime',
   'darkorange',
-  '#136F63'
+  'red'
 ]
 
-const colors = window.matchMedia('(prefers-color-scheme: dark)').matches
+const colors = darkMode
   ? {fg: '#fff', bg: '#000'}
   : {fg: '#000', bg: '#fff'}
 
