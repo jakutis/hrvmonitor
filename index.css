@@ -9,7 +9,6 @@
 }
 
 html, body {
-  background: white;
   margin: 0;
   padding: 0;
 }
@@ -22,7 +21,6 @@ h2 {
   position: sticky;
   top: 2rem;
   z-index: 10000;
-  background: white;
   line-height: 2rem;
   text-align: center;
   cursor: pointer;
@@ -43,4 +41,24 @@ h2 {
 
 .chart {
   height: calc(100vh - 4rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  html, body, h2 {
+    background: black;
+    color: white;
+  }
+  .legend span {
+    color: black;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html, body, h2 {
+    background: white;
+    color: black;
+  }
+  .legend span {
+    color: white;
+  }
 }

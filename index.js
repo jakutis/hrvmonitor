@@ -156,7 +156,7 @@ const redraw = (domElements) => {
   })
 }
 
-const colors = [
+const seriesColors = [
   'blue',
   'red',
   'gold',
@@ -169,16 +169,20 @@ const colors = [
   'black'
 ]
 
+const colors = window.matchMedia('(prefers-color-scheme: dark)').matches
+  ? {fg: '#fff', bg: '#000'}
+  : {fg: '#000', bg: '#fff'}
+
 const drawChart = (domElement, series) => {
   const minimum = min(series.slice(1).map(min))
   const maximum = max(series.slice(1).map(max))
   let d = series.slice(1).map((s, i) => ({
     x: times,
     y: s.slice(0),
-    line: {color: colors[i + 1]},
+    line: {color: seriesColors[i + 1]},
     name: ''
   })).concat({
-    line: {color: colors[0]},
+    line: {color: seriesColors[0]},
     name: '',
     x: series[0].flatMap((s, i) => s === null ? null : [times[i], times[i]]),
     y: series[0].flatMap(s => s === null ? null : [minimum, maximum]),
@@ -186,12 +190,16 @@ const drawChart = (domElement, series) => {
     connectgaps: false
   })
   const layout = {
-      showlegend: false,
+    showlegend: false,
+    paper_bgcolor: colors.bg,
+    plot_bgcolor: colors.bg,
       yaxis: {
-        fixedrange: true
+        color: colors.fg,
+        fixedrange: true,
       },
       xaxis: {
-        visible: false
+        color: colors.fg,
+        visible: false,
       }
     }
   const opts = {
@@ -244,8 +252,7 @@ const main = async () => {
   app.appendChild(windowsElement)
   windows.forEach((window, i) => {
     const label = document.createElement('span')
-    label.style.backgroundColor = colors[i + 1]
-    label.style.color = 'white'
+    label.style.backgroundColor = seriesColors[i + 1]
     label.appendChild(document.createTextNode(`${window}s`))
     windowsElement.appendChild(label)
   })
