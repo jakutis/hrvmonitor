@@ -1,4 +1,4 @@
-let points, mark;
+let points, times, mark;
 
 const extractWindow = (rrs, window) => {
   let duration = 0
@@ -40,7 +40,7 @@ const features = {
   nn50: rrs => nn(rrs, 50),
   pnn50: rrs => nn(rrs, 50) / rrs.length,
   sdnn: rrs => sd(rrs),
-  avnn: rrs => mean(rrs),
+  avnn: rrs => mean(rrs) || null,
   sdsd: rrs => sd(deltas(rrs)),
   ebc: rrs => max(rrs) - min(rrs),
   rmssd: rrs => {
@@ -56,6 +56,7 @@ const addMarker = () => {
   mark = true
 }
 const handleHeartRate = (domElements, hr) => {
+  times.push(new Date())
   if (mark) {
     mark = false
     chartIds.forEach(c => points[c][0].push(1))
@@ -135,6 +136,7 @@ const start = async (domElements) => {
     c[cid] = [[]]
     return c
   }, {})
+  times = []
   mark = false
 
   characteristic.startNotifications()
@@ -154,29 +156,53 @@ const redraw = (domElements) => {
   })
 }
 
+const colors = [
+  'blue',
+  'red',
+  'gold',
+  'green',
+  'firebrick',
+  'darkkhaki',
+  'deeppink',
+  'darkorange',
+  'lime',
+  'black'
+]
+
 const drawChart = (domElement, series) => {
   const minimum = min(series.slice(1).map(min))
-  const data = {
-    labels: Object.keys(series[0]),
-    series: series.map((s, index) => ({name:`series${index}`, data: index === 0 ? markerSeries(s, minimum) : s}))
-  }
-  const options = {
-    plugins: [
-      window['Chartist.plugins.ctMarker']({
-        series: ['series0']
-      })
-    ],
-    showPoint: false,
-    lineSmooth: false,
-    axisX: {
-      showGrid: true,
-      showLabel: false
-    },
-    axisY: {
-      type: Chartist.AutoScaleAxis,
+  const maximum = max(series.slice(1).map(max))
+  let d = series.slice(1).map((s, i) => ({
+    x: times,
+    y: s.slice(0),
+    line: {color: colors[i + 1]},
+    name: ''
+  })).concat({
+    line: {color: colors[0]},
+    name: '',
+    x: series[0].flatMap((s, i) => s === null ? null : [times[i], times[i]]),
+    y: series[0].flatMap(s => s === null ? null : [minimum, maximum]),
+    mode: 'lines',
+    connectgaps: false
+  })
+  const layout = {
+      showlegend: false,
+      yaxis: {
+        fixedrange: true
+      },
+      xaxis: {
+        visible: false
+      }
     }
+  const opts = {
+    margin: { r:0,l:0,b:0,autoexpand:true,pad:0,t: 0 },
+    responsive: true
+    }
+  if (domElement.childNodes.length === 0) {
+    Plotly.newPlot(domElement, d, layout, opts );
+  } else {
+    Plotly.react(domElement, d, layout, opts );
   }
-  new Chartist.Line(domElement, data, options);
 }
 
 const main = async () => {
@@ -199,13 +225,15 @@ const main = async () => {
   const loadButton = document.createElement('button')
   loadButton.appendChild(document.createTextNode('load'))
   loadButton.addEventListener('click', () => {
-    points = JSON.parse(serializedData.value)
+    const data = JSON.parse(serializedData.value)
+    points = data.points
+    times = data.times.map(t => new Date(t))
     redraw(domElements)
   }, false)
   const saveButton = document.createElement('button')
   saveButton.appendChild(document.createTextNode('save'))
   saveButton.addEventListener('click', () => {
-    serializedData.value = JSON.stringify(points)
+    serializedData.value = JSON.stringify({times,points})
   }, false)
   app.appendChild(saveButton)
   app.appendChild(loadButton)
@@ -216,7 +244,8 @@ const main = async () => {
   app.appendChild(windowsElement)
   windows.forEach((window, i) => {
     const label = document.createElement('span')
-    label.className = `label-${String.fromCharCode(i + 97 + 1)}`
+    label.style.backgroundColor = colors[i + 1]
+    label.style.color = 'white'
     label.appendChild(document.createTextNode(`${window}s`))
     windowsElement.appendChild(label)
   })
