@@ -230,8 +230,10 @@ const colors = darkMode
   : {fg: '#000', bg: '#fff'}
 
 const drawChart = (domElement, series) => {
-  const minimum = min(series.slice(1).filter((s, i) => windowRendered[i]).map(min))
-  const maximum = max(series.slice(1).filter((s, i) => windowRendered[i]).map(max))
+  const sinceTimestamp = times[times.length - 1].getTime() - 10 * 60 * 1000
+  const since = times.findIndex(time => time.getTime() >= sinceTimestamp)
+  const minimum = min(series.slice(1).filter((s, i) => windowRendered[i]).map(xs => min(xs.slice(since).filter(x => x !== null))))
+  const maximum = max(series.slice(1).filter((s, i) => windowRendered[i]).map(xs => max(xs.slice(since).filter(x => x !== null))))
   let d = series.slice(1).flatMap((s, i) => !windowRendered[i] ? [] : [{
     x: times,
     y: s.slice(0),
@@ -256,7 +258,7 @@ const drawChart = (domElement, series) => {
       xaxis: {
         color: colors.fg,
         visible: false,
-        range: [new Date(times[times.length - 1].getTime() - 10 * 60 * 1000), times[times.length - 1]]
+        range: [new Date(sinceTimestamp), times[times.length - 1]]
       }
     }
   const opts = {
