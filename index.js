@@ -218,7 +218,7 @@ const seriesColors = [
   darkMode ? 'white' : 'black',
   darkMode ? 'white' : 'black',
   '#6B8FFF',
-  'purple',
+  'magenta',
   'gold',
   'lime',
   'darkorange',
