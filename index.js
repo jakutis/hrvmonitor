@@ -253,6 +253,7 @@ const drawChart = (domElement, series) => {
     plot_bgcolor: colors.bg,
       yaxis: {
         color: colors.fg,
+        gridcolor: colors.fg,
         fixedrange: true,
       },
       xaxis: {
