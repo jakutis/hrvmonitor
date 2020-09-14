@@ -1,4 +1,4 @@
-let points, times, mark, drawingPaused, windowRendered;
+let points, times, mark, drawingPaused, windowRendered, reconnecting, connected;
 
 const extractWindow = (rrs, window) => {
   let duration = 0
@@ -124,15 +124,66 @@ const decode = (data) => {
   }
 }
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+const createHandleCharacteristicvaluechanged = (domElements) => (event) => handleHeartRate(domElements, decode(new Uint8Array(event.target.value.buffer)))
+
 const start = async (domElements) => {
+  const handler = createHandleCharacteristicvaluechanged(domElements)
   const device = await navigator.bluetooth.requestDevice({
     filters: [{services: ['heart_rate']}]
   })
-  const server = await device.gatt.connect()
-  const service = await server.getPrimaryService('heart_rate')
-  const characteristic = await service.getCharacteristic('heart_rate_measurement')
+  reconnecting = false
+  connected = false
+  let characteristic
+  const connect = async () => {
+    if (connected) {
+      return
+    }
+    // device https://developer.mozilla.org/en-US/docs/Web/API/BluetoothDevice
+    // device.gatt: https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTServer
+    const server = await device.gatt.connect()
+    if (connected) {
+      return
+    }
+    // server: https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTServer
+    const service = await server.getPrimaryService('heart_rate')
+    if (connected) {
+      return
+    }
+    // service: https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTService
+    characteristic = await service.getCharacteristic('heart_rate_measurement')
+    if (connected) {
+      return
+    }
+    // characteristic: https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTCharacteristic
+    characteristic.addEventListener('characteristicvaluechanged', handler, false)
+    characteristic.startNotifications()
+    connected = true
+  }
+  const connectWithRetries = async () => {
+    connected = false
+    while (true) {
+      try {
+        const timeout = sleep(3000).then(() => {
+          throw new Error('timeout')
+        })
+        await Promise.race([connect(), timeout])
+        break
+      } catch (e) {
+      }
+    }
+  }
 
-  characteristic.addEventListener('characteristicvaluechanged', () => handleHeartRate(domElements, decode(new Uint8Array(characteristic.value.buffer))))
+  device.addEventListener('gattserverdisconnected', async () => {
+    if (reconnecting) {
+      return
+    }
+    reconnecting = true
+    await connectWithRetries()
+    reconnecting = false
+  }, false)
+
   points = chartIds.reduce((c, cid) => {
     c[cid] = [[]]
     return c
@@ -141,7 +192,7 @@ const start = async (domElements) => {
   drawingPaused = false
   mark = false
 
-  characteristic.startNotifications()
+  await connectWithRetries()
   return () => characteristic.stopNotifications()
 }
 
