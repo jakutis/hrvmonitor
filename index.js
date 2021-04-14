@@ -18,12 +18,34 @@ const extractWindow = (rrs, window) => {
 
 const sqr = x => x * x
 const mean = xs => xs.reduce((sum, x) => sum + x, 0) / xs.length
-const max = xs => Math.max.apply(Math, xs)
-const min = xs => Math.min.apply(Math, xs)
 const sd = xs => {
   const av = mean(xs)
   const sum = xs.reduce((sum, x) => sum + sqr(x - av), 0)
   return Math.sqrt(sum / (xs.length - 1))
+}
+const max = xs => Math.max.apply(Math, xs)
+const min = xs => Math.min.apply(Math, xs)
+const medianSorted = (array) => {
+  if (array.length % 2 === 0) {
+    return (array[array.length / 2 - 1] + array[array.length / 2]) / 2
+  } else {
+    return array[Math.floor(array.length / 2)]
+  }
+}
+const binsSorted = (array, width) => {
+  const bins = []
+  for (let start = array[0]; start <= array[array.length - 1]; start += width) {
+    bins.push({
+      start,
+      end: start + width,
+      count: 0
+    })
+  }
+  array.forEach(value => {
+    const bin = bins.find(bin => bin.start <= value && value < bin.end)
+    bin.count++
+  })
+  return bins
 }
 const deltas = xs => {
   const ds = []
@@ -43,12 +65,26 @@ const features = {
   avnn: rrs => mean(rrs) || null,
   sdsd: rrs => sd(deltas(rrs)),
   ebc: rrs => max(rrs) - min(rrs),
+  lnrmssd: rrs => Math.log(features.rmssd(rrs)),
+  si: rrs => {
+    const out = {}
+    const sortedRrs = rrs.slice()
+    sortedRrs.sort((a, b) => a - b)
+    out.binsAmo = binsSorted(sortedRrs, 50)
+    out.AMo = max(out.binsAmo.map(a => a.count)) / rrs.length
+    out.Mn = min(rrs)
+    out.Mx = max(rrs)
+    out.MxDMn = out.Mx - out.Mn
+    out.Mo = medianSorted(rrs)
+    out.SI = (out.AMo * 100) / (2 * (out.Mo / 1000) * (out.MxDMn / 1000))
+    return Math.sqrt(out.SI)
+  },
   rmssd: rrs => {
     const sum = deltas(rrs).reduce((sum, d) => sum + sqr(d), 0)
     return Math.sqrt(sum / rrs.length)
   }
 }
-const windows = [7.5, 15, 30, 60, 120, 240, 480]
+const windows = [7.5, 15, 30, 60, 120, 180, 240, 480]
 windowRendered = windows.map(() => true)
 
 const chartIds = ['heartRate', 'RR'].concat(Object.keys(features))
@@ -222,6 +258,7 @@ const seriesColors = [
   'gold',
   'lime',
   'darkorange',
+  'blue',
   'red'
 ]
 
